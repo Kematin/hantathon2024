@@ -2,8 +2,9 @@ from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse
 from loguru import logger
 
-from models import VoiceItem
+from models import TextItem, VoiceItem
 from service.command import CommandHandler
+from service.text2speech import TextToSpeech
 
 router = APIRouter(tags=["Main API"], prefix="/api")
 
@@ -25,6 +26,7 @@ async def get_command(request: Request, voice: VoiceItem):
     return {"command": command}
 
 
-@router.post("/speach", response_class=JSONResponse)
-async def text_to_speach(request: Request):
-    return {"message": "OK"}
+@router.post("/speech", response_class=JSONResponse)
+async def text_to_speach(request: Request, text: TextItem):
+    content = TextToSpeech().convert(text.text, save=True)
+    return {"content": content}

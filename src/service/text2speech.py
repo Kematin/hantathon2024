@@ -1,21 +1,28 @@
+import base64
 import tempfile
 
-import requests
 from gtts import gTTS
 
-mytext = "всем привет!"
-language = "ru"
-
-myobj = gTTS(text=mytext, lang=language, slow=False)
+base64content = str
 
 
-with tempfile.NamedTemporaryFile(suffix=".mp3", delete=True) as temp_file:
-    myobj.save("salam.mp3")
-    myobj.save(temp_file.name)
+class TextToSpeech:
+    def __init__(self) -> None:
+        pass
 
-    with open(temp_file.name, "rb") as file:
-        audio_bytes = file.read()
+    def convert(self, text: str, lang: str = "ru", save: bool = False) -> base64content:
+        myobj = gTTS(text=text, lang=lang, slow=False)
 
-    # отправка файла
+        content = None
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=True) as temp_file:
+            if save:
+                myobj.save("speech_test.mp3")
+            myobj.save(temp_file.name)
 
-    file.close()
+            with open(temp_file.name, "rb") as file:
+                content = file.read()
+
+            file.close()
+
+        base64_string = base64.b64encode(content).decode("utf-8")
+        return base64_string

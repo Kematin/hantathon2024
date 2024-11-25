@@ -1,10 +1,18 @@
 // ---------------------------- VARIABLES ---------------------------------------
 
-// MIC
+// Mic
 let isEnabled = false;
 let mediaRecorder = null;
 let voice = [];
 let stream = null;
+
+// Commands
+const commands = {
+  site_info: siteInfoCommand,
+  legend_info: legendInfoCommand,
+  open_card: openCardCommand,
+  disablity_group: disablityGroupCommand,
+};
 
 // ---------------------------- RECORD MIC ---------------------------------------
 
@@ -102,6 +110,29 @@ function arrayBufferToBase64(buffer) {
 //   |  O        \___/  |
 // ~^~^~^~^~^~^~^~^~^~^~^~^~
 
-export function executeCommand(command) {
-  console.log(`EXECUTE ${command}`);
+function executeCommand(command) {
+  func = getExecuteCommand(command);
+  if (func === false) {
+    executeNotFound();
+  } else {
+    func();
+  }
 }
+
+function executeNotFound() {}
+
+function getExecuteCommand(typeCommand) {
+  try {
+    return commands[typeCommand];
+  } catch (e) {
+    return false;
+  }
+}
+
+const siteInfoCommand = () => {};
+
+const legendInfoCommand = () => {};
+
+const openCardCommand = () => {};
+
+const disablityGroupCommand = () => {};

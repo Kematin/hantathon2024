@@ -1,8 +1,7 @@
 from service.speech2text import SpeechToText
+from setup.init_model import init_speech_model
 
 bytes64 = str
-
-from setup.init_model import init_model
 
 
 class CommandHandler:
@@ -10,6 +9,6 @@ class CommandHandler:
         pass
 
     def get_command(self, voice: bytes64):
-        model = init_model()
+        model = init_speech_model()
         text = SpeechToText(model).convert(voice)
         return text

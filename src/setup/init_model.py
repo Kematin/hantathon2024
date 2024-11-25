@@ -5,7 +5,7 @@ from faster_whisper import WhisperModel
 model = None
 
 
-def init_model(type: Literal["cuda", "cpu"] = "cpu"):
+def init_speech_model(type: Literal["cuda", "cpu"] = "cpu"):
     global model
     if model is not None:
         return model
