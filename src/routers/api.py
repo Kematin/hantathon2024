@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 router = APIRouter(tags=["Main API"], prefix="/api")
 
@@ -7,6 +7,11 @@ router = APIRouter(tags=["Main API"], prefix="/api")
 @router.get("/", response_class=JSONResponse)
 async def index_page(request: Request):
     return {"message": "OK"}
+
+
+@router.get("/js", response_class=FileResponse)
+async def get_javascript(request: Request):
+    return FileResponse("component/js/index.js")
 
 
 @router.post("/command", response_class=JSONResponse)
