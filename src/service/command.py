@@ -4,7 +4,7 @@ from time import time
 from faster_whisper import WhisperModel
 
 
-class SpeachToText:
+class SpeechToText:
     def __init__(self) -> None:
         pass
 
@@ -43,7 +43,7 @@ class SpeachToText:
 
 
 if __name__ == "__main__":
-    speach = SpeachToText()
+    speach = SpeechToText()
     filename = "test.mp3"
     file_content = speach.get_file_content(filename)
     result = speach.convert(file_content)
