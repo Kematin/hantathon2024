@@ -10,10 +10,8 @@ python = "3.12.4"
 fastapi = "^0.115.5"
 uvicorn = "^0.32.1"
 loguru = "^0.7.2"
-sqlalchemy = "^2.0.36"
 pydantic-settings = "^2.6.1"
-speechrecognition = "^3.11.0"
-pydub = "^0.25.1"
+faster-whisper = "^1.1.0"
 
 
 [build-system]

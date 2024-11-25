@@ -1,4 +1,6 @@
 *.mp3
+*.pb
+*.txt
 
 .code
 logs
