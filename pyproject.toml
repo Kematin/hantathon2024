@@ -12,6 +12,7 @@ uvicorn = "^0.32.1"
 loguru = "^0.7.2"
 pydantic-settings = "^2.6.1"
 faster-whisper = "^1.1.0"
+gtts = "^2.5.4"
 
 
 [build-system]

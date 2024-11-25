@@ -6,12 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import config
 from routers import routers
-from setup import configure_logger
+from setup import configure_logger, init_model
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logger()
+    init_model()
     yield
 
 
