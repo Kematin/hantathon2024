@@ -12,6 +12,4 @@ Back:
     - Poetry
 
 Frontend:
-- Node v.23
-- Vite
-- React
+- Component with JS
