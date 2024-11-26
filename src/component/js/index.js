@@ -7,12 +7,20 @@ let voice = [];
 let stream = null;
 
 // Commands
-const commands = {
-  site_info: siteInfoCommand,
-  legend_info: legendInfoCommand,
-  open_card: openCardCommand,
-  disablity_group: disablityGroupCommand,
-};
+function init_commands() {
+  const commands = {
+    site_info: siteInfoCommand,
+    legend_info: legendInfoCommand,
+    open_card: openCardCommand,
+    disablity_group: disablityGroupCommand,
+    path: pathCommand,
+    legend_place: legendPlaceCommand,
+    search_radius: searchRadiusCommand,
+    detailed_info: detailedInfoCommnad,
+    search_place: searchPlaceCommand,
+  };
+  return commands;
+}
 
 // ---------------------------- RECORD MIC ---------------------------------------
 
@@ -23,8 +31,14 @@ const commands = {
 
 export function createListener() {
   const assistentComponent = document.querySelector("#assistent");
-
-  assistentComponent.addEventListener("click", async () => await handleClick());
+  if (assistentComponent === null) {
+    console.warn("No assistent component");
+  } else {
+    assistentComponent.addEventListener(
+      "click",
+      async () => await handleClick()
+    );
+  }
 }
 
 async function handleClick() {
@@ -65,8 +79,14 @@ function stopRecord() {
     const byteArray = new Uint8Array(arrayBuffer);
 
     voice = [];
-    command = getCommand(byteArray);
-    executeCommand(command);
+    getCommand(byteArray);
+    // getCommand(byteArray).then((data) => {
+    //   if (data === false) {
+    //     executeApiError();
+    //   } else {
+    //     executeCommand(data.command);
+    //   }
+    // });
   };
   reader.readAsArrayBuffer(audioBlob);
 }
@@ -90,9 +110,16 @@ function getCommand(byteArray) {
     .then((response) => response.json())
     .then((data) => {
       console.log("API Response:", data);
+      if (data === false) {
+        executeApiError();
+      } else {
+        executeCommand(data.command);
+      }
+      // return data;
     })
     .catch((error) => {
       console.error("Error sending request:", error);
+      return false;
     });
 }
 
@@ -110,29 +137,281 @@ function arrayBufferToBase64(buffer) {
 //   |  O        \___/  |
 // ~^~^~^~^~^~^~^~^~^~^~^~^~
 
-function executeCommand(command) {
-  func = getExecuteCommand(command);
+function executeCommand(command, data = null) {
+  const func = getExecuteCommand(command);
+  console.log(`Execute ${func}`);
   if (func === false) {
     executeNotFound();
   } else {
-    func();
+    if (data === null) {
+      func();
+    } else {
+      func(data);
+    }
   }
 }
 
-function executeNotFound() {}
-
 function getExecuteCommand(typeCommand) {
   try {
+    const commands = init_commands();
     return commands[typeCommand];
   } catch (e) {
     return false;
   }
 }
 
-const siteInfoCommand = () => {};
+function executeApiError() {
+  console.error("api error");
+  playAudioDefault("api_error");
+}
 
-const legendInfoCommand = () => {};
+function executeNotFound() {
+  console.error("command not found");
+  playAudioDefault("not_found_error");
+}
 
-const openCardCommand = () => {};
+function executeNotFoundPlace() {
+  console.error("command not found");
+  playAudioDefault("place_not_found_error");
+}
 
-const disablityGroupCommand = () => {};
+// ---------------------------- AUDIO WITH API LOGIC ------------------------------------
+
+//              _.-````'-,_
+//    _,.,_ ,-'`           `'-.,_
+//  /)     (\                   '``-.
+// ((      ) )                      `\
+//  \)    (_/                        )\
+//   |       /)           '    ,'    / \
+//   `\    ^'            '     (    /  ))
+//     |      _/\ ,     /    ,,`\   (  "`
+//      \Y,   |  \  \  | ````| / \_ \
+//        `)_/    \  \  )    ( >  ( >
+//                 \( \(     |/   |/
+//     lam & kem  /_(/_(    /_(  /_(
+
+function playAudioDefault(filename) {
+  fetch(`${API_HOST}:${API_PORT}/api/default/${filename}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Audio file not found");
+      }
+      return response.blob();
+    })
+    .then((audioBlob) => {
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+
+      audio.play();
+    })
+    .catch((error) => {
+      console.error("Error playing audio:", error);
+    });
+}
+
+function playAudioCommand(text) {
+  fetch(`${API_HOST}:${API_PORT}/api/speech`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to convert text to speech");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const base64Audio = data.content;
+
+      const binaryString = atob(base64Audio);
+      const byteArray = new Uint8Array(binaryString.length);
+
+      for (let i = 0; i < binaryString.length; i++) {
+        byteArray[i] = binaryString.charCodeAt(i);
+      }
+
+      const audioBlob = new Blob([byteArray], { type: "audio/mpeg" });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      const audio = new Audio(audioUrl);
+      audio.play();
+    })
+    .catch((error) => {
+      console.error("Error playing audio:", error);
+    });
+}
+
+// ---------------------------- MAIN JS LOGIC ------------------------------------
+
+//            .--._.--.
+//           ( O     O )
+//           /   . .   \
+//          .`._______.'.
+//         /(           )\
+//       _/  \  \   /  /  \_
+//    .~   `  \  \ /  /  '   ~.
+//   {    -.   \  V  /   .-    }
+// _ _`.    \  |  |  |  /    .'_ _
+// >_       _} |  |  | {_       _<
+//  /. - ~ ,_-'  .^.  `-_, ~ - .\
+//          '-'|/   \|`-`
+
+function getFormattedInfoRows(rows, indices) {
+  let i = 0;
+  const formattedInfo = indices.map((index) => {
+    i++;
+    const row = rows[index - 1];
+    if (row) {
+      const [key, value] = row.innerText.split("\t");
+      return `${i}. ${key.trim()}: ${value.trim()}`;
+    }
+    return null;
+  });
+
+  return formattedInfo.filter(Boolean).join("\n");
+}
+
+function handleSearchInput(place) {
+  const enterEvent = new KeyboardEvent("keydown", {
+    key: "Enter",
+    code: "Enter",
+    which: 13,
+    keyCode: 13,
+    bubbles: true,
+  });
+
+  const radioElement = document.querySelector("p.radio span.custom-radio");
+  const searchElement = document.querySelector(
+    "a[placeholder='Поставьте точку на карте или введите адрес']"
+  );
+  const searchInput = document.querySelector(
+    "div.blockFind div.select2-search input[role='combobox']"
+  );
+
+  radioElement.click();
+  searchElement.click();
+  searchInput.click();
+
+  searchInput.value = place;
+
+  const inputEvent = new Event("input", { bubbles: true });
+  searchInput.dispatchEvent(inputEvent);
+
+  setTimeout(() => {
+    searchInput.dispatchEvent(enterEvent);
+  }, 500);
+}
+
+function waitForTableAndSelectFirstElement() {
+  const tableSelector = "div.k-grid-content tbody";
+  const interval = 200;
+  const maxWaitTime = 5000;
+  let elapsedTime = 0;
+
+  return new Promise((resolve, reject) => {
+    const checkTable = setInterval(() => {
+      const tableBody = document.querySelector(tableSelector);
+      if (tableBody && tableBody.rows.length > 0) {
+        clearInterval(checkTable);
+
+        const firstRow = tableBody.rows[0];
+        console.log("First row:", firstRow);
+
+        if (firstRow) {
+          firstRow.click();
+          resolve(firstRow);
+        } else {
+          reject(new Error("First row is undefined."));
+        }
+      }
+
+      elapsedTime += interval;
+      if (elapsedTime >= maxWaitTime) {
+        clearInterval(checkTable);
+        reject(new Error("Table did not load in time."));
+      }
+    }, interval);
+  });
+}
+
+// ---------------------------- INITIAL COMMANDS ------------------------------------
+
+//                               __
+//                      /\    .-" /
+//                     /  ; .'  .'
+//                    :   :/  .'
+//                     \  ;-.'
+//        .--""""--..__/     `.
+//      .'           .'    `o  \
+//     /                    `   ;
+//    :                  \      :
+//  .-;        -.         `.__.-'
+// :  ;          \     ,   ;
+// '._:           ;   :   (
+//     \/  .__    ;    \   `-.
+//  bug ;     "-,/_..--"`-..__)
+//      '""--.._:
+
+const siteInfoCommand = () => {
+  playAudioDefault("site_info");
+};
+
+const legendInfoCommand = () => {
+  playAudioDefault("legend_info");
+};
+
+const openCardCommand = () => {
+  // TODO Open card
+  playAudioDefault("open_card");
+};
+
+const disablityGroupCommand = () => {
+  playAudioDefault("disablity_group");
+};
+
+const pathCommand = (data) => {
+  const from = data.from;
+  const to = data.to;
+};
+
+const legendPlaceCommand = (data) => {};
+
+const searchRadiusCommand = (data) => {};
+
+const searchPlaceCommand = (data) => {
+  const place = data.place;
+  handleSearchInput(place);
+
+  waitForTableAndSelectFirstElement().then((firstRow) => {
+    const [object, address] = firstRow.innerText.split("\t");
+    const formattedText = `Был найден объект ${object} по адресу ${address}`;
+    playAudioCommand(formattedText);
+  });
+};
+
+const detailedInfoCommnad = (data) => {
+  const place = data.place;
+  handleSearchInput(place);
+
+  waitForTableAndSelectFirstElement().then((firstRow) => {
+    const popupElement = document.querySelector(
+      "div.leaflet-popup-content-wrapper"
+    );
+    const [object, address] = firstRow.innerText.split("\t");
+    const objectInfo = `Был найден объект ${object} по адресу: ${address}`;
+    if (popupElement === null) {
+      executeNotFoundPlace();
+    } else {
+      let allInfo = popupElement.querySelectorAll("tr.ng-scope:not(.ng-hide)");
+      const indicesToInclude = [4, 7, 9, 10, 11, 12, 13];
+      const additionalInfo = getFormattedInfoRows(allInfo, indicesToInclude);
+      const fullInfo = `${objectInfo}\n\nПодробная информация:\n${additionalInfo}`;
+      console.log(fullInfo);
+      playAudioCommand(fullInfo);
+    }
+  });
+};

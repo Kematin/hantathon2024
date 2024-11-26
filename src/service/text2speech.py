@@ -26,3 +26,9 @@ class TextToSpeech:
 
         base64_string = base64.b64encode(content).decode("utf-8")
         return base64_string
+
+
+if __name__ == "__main__":
+    with open("text.txt", "r") as file:
+        text = "\n".join(file.readlines())
+    TextToSpeech().convert(text, save=True)
