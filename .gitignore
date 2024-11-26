@@ -1,4 +1,6 @@
-train/results
+# AI
+train/main_dataset
+train/hmao_model
 
 venv
 env

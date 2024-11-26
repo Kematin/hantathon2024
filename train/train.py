@@ -1,73 +1,130 @@
-import pandas as pd
-from dataset import dataset
-from datasets import Dataset
+from pprint import pprint
+
+import evaluate
+import numpy as np
+from datasets import Dataset, DatasetDict
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
+    DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
 )
 
-# Преобразуем данные в DataFrame
-data = pd.DataFrame(list(dataset.items()), columns=["text", "label"])
+from dataset import dataset_info, test_dataset_info
 
-# Преобразуем метки в числовые
-label_mapping = {label: idx for idx, label in enumerate(data["label"].unique())}
-data["label"] = data["label"].map(label_mapping)
+id2label = {
+    0: "site_info",
+    1: "legend_info",
+    2: "open_card",
+    3: "disability_group",
+    4: "path",
+    5: "legend_place",
+    6: "search_radius",
+    7: "detailed_info",
+    8: "search_place",
+}
 
-# Пересоздаем Dataset
-hf_dataset = Dataset.from_pandas(data)
+label2id = {
+    "site_info": 0,
+    "legend_info": 1,
+    "open_card": 2,
+    "disability_group": 3,
+    "path": 4,
+    "legend_place": 5,
+    "search_radius": 6,
+    "detailed_info": 7,
+    "search_place": 8,
+}
 
-# Разделение на тренировочный и тестовый наборы
-train_test_split = hf_dataset.train_test_split(test_size=0.2)
-train_dataset = train_test_split["train"]
-test_dataset = train_test_split["test"]
+num_labels = 9
 
-# Выводим структуру данных для проверки
-print(train_dataset)
-print(test_dataset)
+accuracy = evaluate.load("accuracy")
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+datasetname = "main_dataset"
 
-# Загружаем токенизатор и модель
-model_name = "bert-base-uncased"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+# from datasets import Dataset
 
+# ds = Dataset.from_dict({"pokemon": ["bulbasaur", "squirtle"], "type": ["grass", "water"]})
 
-# Токенизация
-def tokenize_function(examples):
-    return tokenizer(examples["text"], padding="max_length", truncation=True)
+# ds[0]
 
 
-tokenized_train_dataset = train_dataset.map(tokenize_function, batched=True)
-tokenized_test_dataset = test_dataset.map(tokenize_function, batched=True)
+def create_dataset(datasetname):
+    train_texts = [data["text"] for data in dataset_info]
+    train_labels = [label2id[data["label"]] for data in dataset_info]
 
-# Создаем модель
-num_labels = len(data["label"].unique())
-model = AutoModelForSequenceClassification.from_pretrained(
-    model_name, num_labels=num_labels
-)
+    test_texts = [data["text"] for data in test_dataset_info]
+    test_labels = [label2id[data["label"]] for data in test_dataset_info]
 
-# Настройка параметров обучения
-training_args = TrainingArguments(
-    output_dir="./results",
-    eval_strategy="epoch",
-    learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=3,
-    weight_decay=0.01,
-    logging_dir="./logs",
-)
+    train_dataset = Dataset.from_dict({"text": train_texts, "label": train_labels})
+    test_dataset = Dataset.from_dict({"text": test_texts, "label": test_labels})
 
-# Создание тренера
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=tokenized_train_dataset,
-    eval_dataset=tokenized_test_dataset,
-)
+    dataset_dict = DatasetDict({"train": train_dataset, "test": test_dataset})
 
-# Обучение модели
-trainer.train()
+    dataset_dict.save_to_disk(datasetname)
 
-predictions = trainer.predict(tokenized_test_dataset)
-print(predictions)
+    return datasetname
+
+
+def read_dataset(datasetname: str):
+    loaded_dataset = DatasetDict().load_from_disk(datasetname)
+    return loaded_dataset
+
+
+def preprocess_function(examples):
+    return tokenizer(examples["text"], padding=True, truncation=True)
+
+
+def compute_metrics(eval_pred):
+    predictions, labels = eval_pred
+    preds = np.argmax(predictions, axis=1)
+    accuracy = (preds == labels).mean()
+    return {"accuracy": accuracy}
+
+
+def train(model_name):
+    loaded_dataset = read_dataset(datasetname)
+
+    tokenized_new_dataset_dict = loaded_dataset.map(
+        preprocess_function,
+        batched=True,
+    )
+    data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+
+    model = AutoModelForSequenceClassification.from_pretrained(
+        "distilbert-base-uncased",
+        num_labels=num_labels,
+        id2label=id2label,
+        label2id=label2id,
+    )
+
+    training_args = TrainingArguments(
+        output_dir=model_name,
+        learning_rate=2e-5,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=16,
+        num_train_epochs=5,
+        weight_decay=0.01,
+        eval_strategy="epoch",
+        save_strategy="epoch",
+        load_best_model_at_end=True,
+    )
+
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=tokenized_new_dataset_dict["train"],
+        eval_dataset=tokenized_new_dataset_dict["test"],
+        processing_class=tokenizer,
+        data_collator=data_collator,
+        compute_metrics=compute_metrics,
+    )
+
+    trainer.train()
+
+
+# create_dataset(datasetname)
+# dataset = read_dataset(datasetname)
+# pprint(dataset.data)
+train("hmao_model")
