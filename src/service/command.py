@@ -1,6 +1,6 @@
 from typing import Dict, Literal, Tuple
-import pymorphy2
 
+import pymorphy2
 from loguru import logger
 
 from exceptions import APIError
@@ -60,7 +60,6 @@ class CommandHandler:
                 transformed_words.append(word)
         return " ".join(transformed_words)
 
-
     def __get_additional_info(
         self,
         command: Literal[
@@ -111,6 +110,11 @@ class CommandHandler:
             "улицы",
             "улица",
             "о",
+            "для",
+            "месте",
+            "место",
+            "найди",
+            "покажи",
         ]
         place = None
         words = text.split()
@@ -137,4 +141,3 @@ class CommandHandler:
         logger.debug(text)
         command, info = self.convert_text_to_command(text)
         return command, info
-    
