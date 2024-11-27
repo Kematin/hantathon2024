@@ -33,9 +33,9 @@ poetry shell
 
 4. Внедрение Компонента на сайт
 
-> Перейдите на сайт [карты Югры](https://pubweb.admhmao.ru/subjectmaps/MAP_SOCIAL_OBJ)
-> Вставьте компонент component.html
-> Импортируйте javascript с помощью import.js в консоли
+> - Перейдите на сайт [карты Югры](https://pubweb.admhmao.ru/subjectmaps/MAP_SOCIAL_OBJ)
+> - Вставьте компонент component.html
+> - Импортируйте javascript с помощью import.js в консоли
 
 ```html
 <style>
