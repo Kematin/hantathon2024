@@ -1,4 +1,5 @@
 from typing import Dict, Literal, Tuple
+import pymorphy2
 
 from loguru import logger
 
@@ -37,6 +38,28 @@ class CommandHandler:
             .strip()
         )
         return text
+
+    def __change_case_of_place_name(self, place_name, target_case="nomn") -> str:
+        morph = pymorphy2.MorphAnalyzer()
+        valid_cases = {"nomn", "gent", "datv", "accs", "ablt", "loct"}
+
+        if target_case not in valid_cases:
+            raise ValueError(
+                f"Неверный падеж: {target_case}. Допустимые значения: {valid_cases}"
+            )
+
+        words = place_name.split()
+        transformed_words = []
+
+        for word in words:
+            parsed = morph.parse(word)[0]
+            inflected = parsed.inflect({target_case})
+            if inflected:
+                transformed_words.append(inflected.word)
+            else:
+                transformed_words.append(word)
+        return " ".join(transformed_words)
+
 
     def __get_additional_info(
         self,
@@ -97,6 +120,7 @@ class CommandHandler:
         if place is None:
             return None
         else:
+            place = self.__change_case_of_place_name(place)
             return {"place": place}
 
     def convert_text_to_command(self, text: str) -> Tuple[str, additional_info]:
@@ -113,3 +137,4 @@ class CommandHandler:
         logger.debug(text)
         command, info = self.convert_text_to_command(text)
         return command, info
+    

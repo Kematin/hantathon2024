@@ -5,7 +5,7 @@ from gtts import gTTS
 from gtts.tts import gTTSError
 from loguru import logger
 
-# from exceptions import AIError
+from exceptions import AIError
 
 base64content = str
 
@@ -37,7 +37,7 @@ class TextToSpeech:
             return base64_string
         except gTTSError as e:
             logger.error(e)
-            # raise AIError("Internal AI Error")
+            raise AIError("Internal AI Error")
 
 
 if __name__ == "__main__":
