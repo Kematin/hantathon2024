@@ -412,7 +412,7 @@ function handleSearchInput(place) {
       waitForListPopup().then((listPopupElement) => {
         const options = listPopupElement.querySelectorAll("li");
         console.log(options);
-        if (options.length <= 4) {
+        if (options.length <= 2) {
           console.log("click");
           setTimeout(() => {
             searchInput.dispatchEvent(enterEvent);
@@ -423,6 +423,9 @@ function handleSearchInput(place) {
           if (currentIndex < place.length) {
             setTimeout(typeCharacter, 200);
           } else {
+            setTimeout(() => {
+              searchInput.dispatchEvent(enterEvent);
+            }, 500);
             console.error("Could not find a unique option for the input");
           }
         }
@@ -432,6 +435,9 @@ function handleSearchInput(place) {
       if (currentIndex < place.length) {
         setTimeout(typeCharacter, 200);
       } else {
+        setTimeout(() => {
+          searchInput.dispatchEvent(enterEvent);
+        }, 500);
         console.error("Could not find a unique option for the input");
       }
     }

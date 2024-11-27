@@ -85,6 +85,9 @@ class CommandHandler:
             "карте",
             "карта",
             "не",
+            "улицы",
+            "улица",
+            "о",
         ]
         place = None
         words = text.split()
@@ -100,7 +103,7 @@ class CommandHandler:
         model = init_hmao_model()
         result = model(text)[0]
         command, score = result["label"], result["score"]
-        if score < 0.5:
+        if score < 0.3:
             raise APIError("Command not found")
         additional_info = self.__get_additional_info(command, text)
         return command, additional_info
