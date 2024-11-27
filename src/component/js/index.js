@@ -7,16 +7,16 @@ let voice = [];
 let stream = null;
 
 // Commands
-function init_commands() {
+export function initCommands() {
   const commands = {
     site_info: siteInfoCommand,
     legend_info: legendInfoCommand,
     open_card: openCardCommand,
     disability_group: disablityGroupCommand,
-    path: pathCommand,
     legend_place: legendPlaceCommand,
     search_radius: searchRadiusCommand,
     detailed_info: detailedInfoCommnad,
+    path: searchPlaceCommand,
     search_place: searchPlaceCommand,
   };
   return commands;
@@ -42,6 +42,8 @@ export function createListener() {
 }
 
 async function handleClick() {
+  const assistentComponent = document.querySelector("#assistent");
+
   if (!stream) {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   }
@@ -59,9 +61,15 @@ async function handleClick() {
   }
 
   if (!isEnabled) {
+    assistentComponent.classList.remove("assistent");
+    assistentComponent.classList.add("assistentActivated");
+    assistentComponent.style.backgroundColor = "#e2faeb";
     mediaRecorder.start();
     console.log("Recording started");
   } else {
+    assistentComponent.classList.remove("assistentActivated");
+    assistentComponent.classList.add("assistent");
+    assistentComponent.style.backgroundColor = "#F3F5FB";
     mediaRecorder.stop();
     console.log("Recording stopped");
   }
@@ -80,13 +88,6 @@ function stopRecord() {
 
     voice = [];
     getCommand(byteArray);
-    // getCommand(byteArray).then((data) => {
-    //   if (data === false) {
-    //     executeApiError();
-    //   } else {
-    //     executeCommand(data.command);
-    //   }
-    // });
   };
   reader.readAsArrayBuffer(audioBlob);
 }
@@ -107,15 +108,20 @@ function getCommand(byteArray) {
     },
     body: JSON.stringify(payload),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) {
+        console.error(`API responded with status: ${response.status}`);
+        executeNotFound();
+      }
+      return response.json();
+    })
     .then((data) => {
       console.log("API Response:", data);
       if (data === false) {
         executeApiError();
       } else {
-        executeCommand(data.command);
+        executeCommand(data.command, data.data);
       }
-      // return data;
     })
     .catch((error) => {
       console.error("Error sending request:", error);
@@ -153,7 +159,7 @@ function executeCommand(command, data = null) {
 
 function getExecuteCommand(typeCommand) {
   try {
-    const commands = init_commands();
+    const commands = initCommands();
     return commands[typeCommand];
   } catch (e) {
     return false;
@@ -171,7 +177,7 @@ function executeNotFound() {
 }
 
 function executeNotFoundPlace() {
-  console.error("command not found");
+  console.error("place not found");
   playAudioDefault("place_not_found_error");
 }
 
@@ -333,6 +339,17 @@ function handleLegendPlace(place) {
   inputElement.dispatchEvent(enterEvent);
 }
 
+function getElementByXPath(xpath) {
+  const result = document.evaluate(
+    xpath,
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  );
+  return result.singleNodeValue;
+}
+
 function handleSearchInput(place) {
   const enterEvent = new KeyboardEvent("keydown", {
     key: "Enter",
@@ -341,6 +358,7 @@ function handleSearchInput(place) {
     keyCode: 13,
     bubbles: true,
   });
+  const inputEvent = new Event("input", { bubbles: true });
 
   const radioElement = document.querySelector("p.radio span.custom-radio");
   const searchElement = document.querySelector(
@@ -349,19 +367,77 @@ function handleSearchInput(place) {
   const searchInput = document.querySelector(
     "div.blockFind div.select2-search input[role='combobox']"
   );
+  const listPopupSelector =
+    "/html/body/main/subject-maps/div/social-page/div/div/div[1]/div[2]/div/div/div/div/div/div[3]/div[1]/div/ul";
 
   radioElement.click();
   searchElement.click();
   searchInput.click();
 
-  searchInput.value = place;
+  let currentIndex = 0;
 
-  const inputEvent = new Event("input", { bubbles: true });
-  searchInput.dispatchEvent(inputEvent);
+  function waitForListPopup() {
+    return new Promise((resolve, reject) => {
+      const interval = 200;
+      const maxWaitTime = 5000;
+      let elapsedTime = 0;
 
-  setTimeout(() => {
-    searchInput.dispatchEvent(enterEvent);
-  }, 500);
+      const checkPopup = setInterval(() => {
+        const listPopupElement = getElementByXPath(listPopupSelector);
+        if (
+          listPopupElement &&
+          listPopupElement.querySelectorAll("li").length > 0
+        ) {
+          clearInterval(checkPopup);
+          console.log(listPopupElement);
+          resolve(listPopupElement);
+        }
+
+        elapsedTime += interval;
+        if (elapsedTime >= maxWaitTime) {
+          clearInterval(checkPopup);
+          executeNotFoundPlace();
+          reject(new Error("List popup did not load in time."));
+        }
+      }, interval);
+    });
+  }
+
+  function typeCharacter() {
+    searchInput.value = place.slice(0, currentIndex + 1);
+    searchInput.dispatchEvent(inputEvent);
+
+    if (currentIndex >= 4) {
+      console.log(`write ${currentIndex} index`);
+      waitForListPopup().then((listPopupElement) => {
+        const options = listPopupElement.querySelectorAll("li");
+        console.log(options);
+        if (options.length <= 4) {
+          console.log("click");
+          setTimeout(() => {
+            searchInput.dispatchEvent(enterEvent);
+          }, 500);
+          return;
+        } else {
+          currentIndex++;
+          if (currentIndex < place.length) {
+            setTimeout(typeCharacter, 200);
+          } else {
+            console.error("Could not find a unique option for the input");
+          }
+        }
+      });
+    } else {
+      currentIndex++;
+      if (currentIndex < place.length) {
+        setTimeout(typeCharacter, 200);
+      } else {
+        console.error("Could not find a unique option for the input");
+      }
+    }
+  }
+
+  typeCharacter();
 }
 
 function waitForTableAndSelectElement(isFirst = true) {
@@ -393,6 +469,7 @@ function waitForTableAndSelectElement(isFirst = true) {
       elapsedTime += interval;
       if (elapsedTime >= maxWaitTime) {
         clearInterval(checkTable);
+        executeNotFoundPlace();
         reject(new Error("Table did not load in time."));
       }
     }, interval);
@@ -436,11 +513,6 @@ const disablityGroupCommand = () => {
   playAudioDefault("disablity_group");
 };
 
-const pathCommand = (data) => {
-  const from = data.from;
-  const to = data.to;
-};
-
 const legendPlaceCommand = (data) => {
   openLegendPage();
   const place = data.place;
@@ -453,6 +525,7 @@ const searchRadiusCommand = (data) => {
   openCardPage();
   const place = data.place;
   handleSearchInput(place);
+
   waitForTableAndSelectElement(false).then((allRows) => {
     if (!allRows || allRows.length === 0) {
       console.error("No rows found.");
@@ -460,7 +533,6 @@ const searchRadiusCommand = (data) => {
     }
 
     let totalText = "Были найдены следующие объекты:\n";
-    i = 0;
     for (let i = 0; i < allRows.length; i++) {
       if (i === 5) {
         break;
@@ -476,6 +548,10 @@ const searchRadiusCommand = (data) => {
 };
 
 const searchPlaceCommand = (data) => {
+  if (data === undefined) {
+    executeApiError();
+    return;
+  }
   openCardPage();
   const place = data.place;
   handleSearchInput(place);

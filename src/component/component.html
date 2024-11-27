@@ -1,23 +1,42 @@
 <style>
   #assistent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+  .assistent {
+    color: #337ab7;
+    background-color: #F3F5FB;
+    border-radius: 8px;
+    width: 140px;
+    height: 40px;
+  }
+
+  .assistent:hover {
+    background-color: #E4ECFC;
+  }
+
+  .assistentActivated {
     cursor: pointer;
     align-items: center;
     display: flex;
     justify-content: center;
-    color: #337ab7;
-    background-color: #F3F5FB;
+    color: #34c924;
+    background-color: #e2faeb;
     border-radius: 8px;
     width: 140px;
     height: 40px;
     margin-left: 10px;
   }
 
-  #assistent:hover {
-    background-color: #E4ECFC;
+  .assistentActivated:hover {
+    background-color: #c9f5c4;
   }
 </style>
 
-<li role="tab" tabindex="0" ng-class="[{active: active, disabled: disabled}, classes]" class="uib-tab nav-item ng-scope ng-isolate-scope" index="'search'" select="$ctrl.onTabSelect('search')" heading="Ассистент" id="assistent">
+<li role="tab" tabindex="0" ng-class="[{active: active, disabled: disabled}, classes]" class="assistent uib-tab nav-item ng-scope ng-isolate-scope" index="'search'" select="$ctrl.onTabSelect('search')" heading="Ассистент" id="assistent">
   <div>Ассистент</div>
 </li> 
 
