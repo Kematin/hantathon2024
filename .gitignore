@@ -1,6 +1,7 @@
 # AI
 train/main_dataset
 train/hmao_model
+src/ai_hmao_model
 
 venv
 env

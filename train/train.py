@@ -11,7 +11,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from dataset import dataset_info, test_dataset_info
+from dataset import get_dataset_from_csv, test_dataset_info
 
 id2label = {
     0: "site_info",
@@ -43,16 +43,10 @@ accuracy = evaluate.load("accuracy")
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 datasetname = "main_dataset"
 
-# from datasets import Dataset
 
-# ds = Dataset.from_dict({"pokemon": ["bulbasaur", "squirtle"], "type": ["grass", "water"]})
-
-# ds[0]
-
-
-def create_dataset(datasetname):
-    train_texts = [data["text"] for data in dataset_info]
-    train_labels = [label2id[data["label"]] for data in dataset_info]
+def create_dataset(dataset):
+    train_texts = [data["text"] for data in dataset]
+    train_labels = [label2id[data["label"]] for data in dataset]
 
     test_texts = [data["text"] for data in test_dataset_info]
     test_labels = [label2id[data["label"]] for data in test_dataset_info]
@@ -104,7 +98,7 @@ def train(model_name):
         learning_rate=2e-5,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
-        num_train_epochs=5,
+        num_train_epochs=10,
         weight_decay=0.01,
         eval_strategy="epoch",
         save_strategy="epoch",
@@ -124,7 +118,8 @@ def train(model_name):
     trainer.train()
 
 
-# create_dataset(datasetname)
-# dataset = read_dataset(datasetname)
-# pprint(dataset.data)
+dataset_info = get_dataset_from_csv("dataset.csv")
+create_dataset(dataset_info)
+dataset = read_dataset(datasetname)
+pprint(dataset.data)
 train("hmao_model")

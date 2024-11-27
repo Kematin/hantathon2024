@@ -4,6 +4,7 @@ from fastapi import APIRouter, Request, status
 from fastapi.responses import FileResponse, JSONResponse
 from loguru import logger
 
+from exceptions import AIError
 from models import TextItem, VoiceItem
 from service.command import CommandHandler
 from service.text2speech import TextToSpeech
@@ -30,13 +31,16 @@ async def get_javascript(request: Request):
 
 @router.post("/command")
 async def get_command(request: Request, voice: VoiceItem):
-    command = "site_info"
-    text = CommandHandler().get_command(voice.voice)
-    logger.debug(text)
-    return {"command": command, "text": text}
+    command, info = CommandHandler().get_command(voice.voice)
+    return {"command": command, "data": info}
 
 
 @router.post("/speech")
 async def text_to_speach(request: Request, text: TextItem):
-    content = TextToSpeech().convert(text.text)
-    return {"content": content}
+    try:
+        content = TextToSpeech().convert(text.text)
+        return {"content": content}
+    except AIError as e:
+        return JSONResponse(
+            {"error": e}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

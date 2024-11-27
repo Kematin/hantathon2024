@@ -2,6 +2,8 @@
 
 const API_HOST = "http://localhost";
 const API_PORT = 8000;
+const SECRET_KEY = "SECRET";
+const testData = { place: "Белый яр" };
 
 import(`${API_HOST}:${API_PORT}/api/js`)
   .then((module) => {

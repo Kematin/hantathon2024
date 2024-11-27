@@ -12,7 +12,7 @@ function init_commands() {
     site_info: siteInfoCommand,
     legend_info: legendInfoCommand,
     open_card: openCardCommand,
-    disablity_group: disablityGroupCommand,
+    disability_group: disablityGroupCommand,
     path: pathCommand,
     legend_place: legendPlaceCommand,
     search_radius: searchRadiusCommand,
@@ -260,6 +260,35 @@ function playAudioCommand(text) {
 //  /. - ~ ,_-'  .^.  `-_, ~ - .\
 //          '-'|/   \|`-`
 
+function activateTab(tabHeading) {
+  const tabs = document.querySelectorAll("li[role='tab']");
+
+  tabs.forEach((tab) => {
+    if (tab.getAttribute("heading") === tabHeading) {
+      tab.classList.add("active");
+
+      const link = tab.querySelector("a");
+      if (link) {
+        const clickEvent = new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+        });
+        link.dispatchEvent(clickEvent);
+      }
+    } else {
+      tab.classList.remove("active");
+    }
+  });
+}
+
+function openLegendPage() {
+  activateTab("Легенда");
+}
+
+function openCardPage() {
+  activateTab("Поиск");
+}
+
 function getFormattedInfoRows(rows, indices) {
   let i = 0;
   const formattedInfo = indices.map((index) => {
@@ -273,6 +302,35 @@ function getFormattedInfoRows(rows, indices) {
   });
 
   return formattedInfo.filter(Boolean).join("\n");
+}
+
+function handleLegendPlace(place) {
+  const clickEvent = new MouseEvent("click", {
+    bubbles: true,
+    cancelable: true,
+  });
+  const enterEvent = new KeyboardEvent("keydown", {
+    key: "Enter",
+    code: "Enter",
+    which: 13,
+    keyCode: 13,
+    bubbles: true,
+  });
+  const inputEvent = new Event("input", { bubbles: true });
+
+  const popupElement = document.querySelector(
+    "a[placeholder='Выберите населенный пункт']"
+  );
+  const inputElement = document.querySelector(
+    "input[aria-label='Выберите населенный пункт']"
+  );
+
+  popupElement.dispatchEvent(clickEvent);
+
+  inputElement.value = place;
+  inputElement.dispatchEvent(inputEvent);
+
+  inputElement.dispatchEvent(enterEvent);
 }
 
 function handleSearchInput(place) {
@@ -306,7 +364,7 @@ function handleSearchInput(place) {
   }, 500);
 }
 
-function waitForTableAndSelectFirstElement() {
+function waitForTableAndSelectElement(isFirst = true) {
   const tableSelector = "div.k-grid-content tbody";
   const interval = 200;
   const maxWaitTime = 5000;
@@ -318,14 +376,17 @@ function waitForTableAndSelectFirstElement() {
       if (tableBody && tableBody.rows.length > 0) {
         clearInterval(checkTable);
 
-        const firstRow = tableBody.rows[0];
-        console.log("First row:", firstRow);
-
-        if (firstRow) {
-          firstRow.click();
-          resolve(firstRow);
+        if (isFirst) {
+          const firstRow = tableBody.rows[0];
+          if (firstRow) {
+            firstRow.click();
+            resolve(firstRow);
+          } else {
+            reject(new Error("First row is undefined."));
+          }
         } else {
-          reject(new Error("First row is undefined."));
+          const allRows = Array.from(tableBody.rows);
+          resolve(allRows);
         }
       }
 
@@ -361,15 +422,17 @@ const siteInfoCommand = () => {
 };
 
 const legendInfoCommand = () => {
+  openLegendPage();
   playAudioDefault("legend_info");
 };
 
 const openCardCommand = () => {
-  // TODO Open card
+  openCardPage();
   playAudioDefault("open_card");
 };
 
 const disablityGroupCommand = () => {
+  openCardPage();
   playAudioDefault("disablity_group");
 };
 
@@ -378,15 +441,46 @@ const pathCommand = (data) => {
   const to = data.to;
 };
 
-const legendPlaceCommand = (data) => {};
+const legendPlaceCommand = (data) => {
+  openLegendPage();
+  const place = data.place;
+  handleLegendPlace(place);
+  const formattedText = `Была найдена легенда для места ${data.place}`;
+  playAudioCommand(formattedText);
+};
 
-const searchRadiusCommand = (data) => {};
+const searchRadiusCommand = (data) => {
+  openCardPage();
+  const place = data.place;
+  handleSearchInput(place);
+  waitForTableAndSelectElement(false).then((allRows) => {
+    if (!allRows || allRows.length === 0) {
+      console.error("No rows found.");
+      return;
+    }
+
+    let totalText = "Были найдены следующие объекты:\n";
+    i = 0;
+    for (let i = 0; i < allRows.length; i++) {
+      if (i === 5) {
+        break;
+      }
+      const row = allRows[i];
+      const [object, address] = row.innerText.split("\t");
+      const formattedText = `${i + 1}. ${object} по адресу ${address}\n`;
+      totalText += formattedText;
+    }
+    console.log(totalText);
+    playAudioCommand(totalText);
+  });
+};
 
 const searchPlaceCommand = (data) => {
+  openCardPage();
   const place = data.place;
   handleSearchInput(place);
 
-  waitForTableAndSelectFirstElement().then((firstRow) => {
+  waitForTableAndSelectElement().then((firstRow) => {
     const [object, address] = firstRow.innerText.split("\t");
     const formattedText = `Был найден объект ${object} по адресу ${address}`;
     playAudioCommand(formattedText);
@@ -394,10 +488,11 @@ const searchPlaceCommand = (data) => {
 };
 
 const detailedInfoCommnad = (data) => {
+  openCardPage();
   const place = data.place;
   handleSearchInput(place);
 
-  waitForTableAndSelectFirstElement().then((firstRow) => {
+  waitForTableAndSelectElement().then((firstRow) => {
     const popupElement = document.querySelector(
       "div.leaflet-popup-content-wrapper"
     );
