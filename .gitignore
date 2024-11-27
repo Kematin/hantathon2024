@@ -12,6 +12,7 @@ env
 !src/default/*.mp3
 *.pb
 *.txt
+!train/requirements.txt
 
 .code
 logs
