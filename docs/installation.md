@@ -17,7 +17,7 @@ python3.12 -m venv venv
 (venv) deactivate
 
 # Перенесите лучшую эпоху в src (7.0)
-mv hmao_model/checkpoint-364 ../src/ai_hmao_model
+mv hmao_model/checkpoint-N ../src/ai_hmao_model
 cd ..
 ```
 

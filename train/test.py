@@ -1,6 +1,6 @@
 from transformers import pipeline
 
-model = "hmao_model/checkpoint-364"
+model = "hmao_model/checkpoint-522"
 
 classifier = pipeline("text-classification", model)
 

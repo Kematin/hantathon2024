@@ -104,6 +104,7 @@ function getCommand(byteArray) {
   fetch(`${API_HOST}:${API_PORT}/api/command`, {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${SECRET_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -197,7 +198,11 @@ function executeNotFoundPlace() {
 //     lam & kem  /_(/_(    /_(  /_(
 
 function playAudioDefault(filename) {
-  fetch(`${API_HOST}:${API_PORT}/api/default/${filename}`)
+  fetch(`${API_HOST}:${API_PORT}/api/default/${filename}`, {
+    headers: {
+      Authorization: `Bearer ${SECRET_KEY}`,
+    },
+  })
     .then((response) => {
       if (!response.ok) {
         throw new Error("Audio file not found");
@@ -220,6 +225,7 @@ function playAudioCommand(text) {
   fetch(`${API_HOST}:${API_PORT}/api/speech`, {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${SECRET_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ text }),
@@ -374,76 +380,12 @@ function handleSearchInput(place) {
   searchElement.click();
   searchInput.click();
 
-  let currentIndex = 0;
+  searchInput.value = place;
 
-  function waitForListPopup() {
-    return new Promise((resolve, reject) => {
-      const interval = 200;
-      const maxWaitTime = 5000;
-      let elapsedTime = 0;
-
-      const checkPopup = setInterval(() => {
-        const listPopupElement = getElementByXPath(listPopupSelector);
-        if (
-          listPopupElement &&
-          listPopupElement.querySelectorAll("li").length > 0
-        ) {
-          clearInterval(checkPopup);
-          console.log(listPopupElement);
-          resolve(listPopupElement);
-        }
-
-        elapsedTime += interval;
-        if (elapsedTime >= maxWaitTime) {
-          clearInterval(checkPopup);
-          executeNotFoundPlace();
-          reject(new Error("List popup did not load in time."));
-        }
-      }, interval);
-    });
-  }
-
-  function typeCharacter() {
-    searchInput.value = place.slice(0, currentIndex + 1);
-    searchInput.dispatchEvent(inputEvent);
-
-    if (currentIndex >= 4) {
-      console.log(`write ${currentIndex} index`);
-      waitForListPopup().then((listPopupElement) => {
-        const options = listPopupElement.querySelectorAll("li");
-        console.log(options);
-        if (options.length <= 2) {
-          console.log("click");
-          setTimeout(() => {
-            searchInput.dispatchEvent(enterEvent);
-          }, 500);
-          return;
-        } else {
-          currentIndex++;
-          if (currentIndex < place.length) {
-            setTimeout(typeCharacter, 200);
-          } else {
-            setTimeout(() => {
-              searchInput.dispatchEvent(enterEvent);
-            }, 500);
-            console.error("Could not find a unique option for the input");
-          }
-        }
-      });
-    } else {
-      currentIndex++;
-      if (currentIndex < place.length) {
-        setTimeout(typeCharacter, 200);
-      } else {
-        setTimeout(() => {
-          searchInput.dispatchEvent(enterEvent);
-        }, 500);
-        console.error("Could not find a unique option for the input");
-      }
-    }
-  }
-
-  typeCharacter();
+  searchInput.dispatchEvent(inputEvent);
+  setTimeout(() => {
+    searchInput.dispatchEvent(enterEvent);
+  }, 1000);
 }
 
 function waitForTableAndSelectElement(isFirst = true) {
@@ -528,6 +470,7 @@ const legendPlaceCommand = (data) => {
 };
 
 const searchRadiusCommand = (data) => {
+  playAudioDefault("wait");
   openCardPage();
   const place = data.place;
   handleSearchInput(place);
@@ -540,7 +483,7 @@ const searchRadiusCommand = (data) => {
 
     let totalText = "Были найдены следующие объекты:\n";
     for (let i = 0; i < allRows.length; i++) {
-      if (i === 5) {
+      if (i === 2) {
         break;
       }
       const row = allRows[i];
@@ -570,6 +513,7 @@ const searchPlaceCommand = (data) => {
 };
 
 const detailedInfoCommnad = (data) => {
+  playAudioDefault("wait");
   openCardPage();
   const place = data.place;
   handleSearchInput(place);

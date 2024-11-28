@@ -2,7 +2,6 @@ label,text
 site_info,сайт
 site_info,саит
 site_info,сайты
-site_info,расскажи про сайт
 site_info,что за сайт
 site_info,расскажи об этом сайте
 site_info,информация о сайте
@@ -20,33 +19,15 @@ site_info,объесни про саит
 site_info,что это за вебсайт
 site_info,про что этот сайт
 site_info,для чего этот сайт
-site_info,что представляет собой сайт
 site_info,что ты знаешь об этом ресурсе
-site_info,этот сайт для чего
 site_info,что включает в себя сайт
-site_info,объясни суть сайта
-site_info,зачем этот сайт
-site_info,сайт предназначен для
-site_info,расскажи об этом ресурсе
-site_info,что о сайте можешь рассказать
-site_info,какая цель этого сайта
-site_info,какая информация на этом сайте
-site_info,что особенного на сайте
 site_info,зачем создан этот сайт
-site_info,какова цель сайта
 site_info,какие функции у сайта
 site_info,что включает сайт
 site_info,о чём сайт вообще
 site_info,объясни принцип работы сайта
 site_info,что можно найти на сайте
 site_info,расскажи об особенностях сайта
-site_info,что важного на этом сайте
-site_info,чем интересен сайт
-site_info,какая цель у сайта
-site_info,что в себе содержит сайт
-site_info,что полезного на сайте
-site_info,как работает этот сайт
-site_info,этот сайт для чего предназначен
 legend_info,покажи легенду
 legend_info,расскажи легенду
 legend_info,что означает эта легенда
@@ -87,11 +68,8 @@ open_card,покажи карту
 open_card,открой карту
 open_card,карта
 open_card,хочу увидеть карту
-open_card,покажи местность на карте
 open_card,где карта
 open_card,отобрази карту
-open_card,покажи план местности
-open_card,аткрой карту
 open_card,карата
 open_card,хочу увиеть карту
 open_card,покажи местнасть на карте
@@ -107,24 +85,20 @@ open_card,как открыть карту
 open_card,отобрази план
 open_card,покажи карту местности
 open_card,дай мне карту
-open_card,как найти карту
-open_card,что на карте
-open_card,отобрази местность
-open_card,где карта расположена
-open_card,что на карте изображено
-open_card,покажи карту области
+disability_group,какие есть группы инвалидности
+disability_group,группа инвалидности
 disability_group,расскажи про группу инвалидности
 disability_group,какая это группа
 disability_group,расскажи об инвалидности
 disability_group,что это за группа инвалидности
 disability_group,объясни про инвалидность
-disability_group,какие бывают группы инвалидности?
+disability_group,какие бывают группы инвалидности
 disability_group,объясни группы инвалидности
 disability_group,какая ето группа
 disability_group,раскажи об инвалидности
 disability_group,што ето за группа инвалидности
 disability_group,объесни про инвалидность
-disability_group,какие быывают группы инвалидности?
+disability_group,какие быывают группы инвалидности
 disability_group,объесни группы инвалидности
 path,как добраться от до
 path,построй маршрут до
@@ -270,6 +244,114 @@ search_place,что находится в городе диспансер
 search_place,найди в этом районе психоневралогический центр
 search_place,поиск в поселении центр помощи больным
 search_place,что есть в поселке центр помощи инвалидам
+search_place,найди МФЦ
+search_place,найди школу номер 1
+search_place,найди сити молл
+search_place,найди ауру
+search_place,найди мемориал
+search_place,найди памятник
+search_place,найди проспект ленина
+search_place,найди баню
+search_place,найди кабанчик
+search_place,найди школу номер 2
+search_place,найди школу номер 6
+search_place,найди торговый центр югра
+search_place,найди снежинку
+search_place,найди белый яр
+search_place,найди снежный
+search_place,найди радужный
+search_place,найди нефтьюганск
+search_place,найди детский сад
+search_place,найди одуванчик
+search_place,найди сургут
+search_place,найди больницу для инвалидов
+search_place,найди больницу для детей
+search_place,найди больницу
+search_place,найди диспансер
+search_place,найди психоневралогический центр
+search_place,найди центр помощи больным
+search_place,найди центр помощи инвалидам
+search_place,найди на карте МФЦ
+search_place,найди на карте школу номер 1
+search_place,найди на карте сити молл
+search_place,найди на карте ауру
+search_place,найди на карте мемориал
+search_place,найди на карте памятник
+search_place,найди на карте проспект ленина
+search_place,найди на карте баню
+search_place,найди на карте кабанчик
+search_place,найди на карте школу номер 2
+search_place,найди на карте школу номер 6
+search_place,найди на карте торговый центр югра
+search_place,найди на карте снежинку
+search_place,найди на карте белый яр
+search_place,найди на карте снежный
+search_place,найди на карте радужный
+search_place,найди на карте нефтьюганск
+search_place,найди на карте детский сад
+search_place,найди на карте одуванчик
+search_place,найди на карте сургут
+search_place,найди на карте больницу для инвалидов
+search_place,найди на карте больницу для детей
+search_place,найди на карте больницу
+search_place,найди на карте диспансер
+search_place,найди на карте психоневралогический центр
+search_place,найди на карте центр помощи больным
+search_place,найди на карте центр помощи инвалидам
+search_place,покажи на карте МФЦ
+search_place,покажи на карте школу номер 1
+search_place,покажи на карте сити молл
+search_place,покажи на карте ауру
+search_place,покажи на карте мемориал
+search_place,покажи на карте памятник
+search_place,покажи на карте проспект ленина
+search_place,покажи на карте баню
+search_place,покажи на карте кабанчик
+search_place,покажи на карте школу номер 2
+search_place,покажи на карте школу номер 6
+search_place,покажи на карте торговый центр югра
+search_place,покажи на карте снежинку
+search_place,покажи на карте белый яр
+search_place,покажи на карте снежный
+search_place,покажи на карте радужный
+search_place,покажи на карте нефтьюганск
+search_place,покажи на карте детский сад
+search_place,покажи на карте одуванчик
+search_place,покажи на карте сургут
+search_place,покажи на карте больницу для инвалидов
+search_place,покажи на карте больницу для детей
+search_place,покажи на карте больницу
+search_place,покажи на карте диспансер
+search_place,покажи на карте психоневралогический центр
+search_place,покажи на карте центр помощи больным
+search_place,покажи на карте центр помощи инвалидам
+search_place,найди мне МФЦ
+search_place,найди мне школу номер 1
+search_place,найди мне сити молл
+search_place,найди мне ауру
+search_place,найди мне мемориал
+search_place,найди мне памятник
+search_place,найди мне проспект ленина
+search_place,найди мне баню
+search_place,найди мне кабанчик
+search_place,найди мне школу номер 2
+search_place,найди мне школу номер 6
+search_place,найди мне торговый центр югра
+search_place,найди мне снежинку
+search_place,найди мне белый яр
+search_place,найди мне снежный
+search_place,найди мне радужный
+search_place,найди мне нефтьюганск
+search_place,найди мне детский сад
+search_place,найди мне одуванчик
+search_place,найди мне сургут
+search_place,найди мне больницу для инвалидов
+search_place,найди мне больницу для детей
+search_place,найди мне больницу
+search_place,найди мне диспансер
+search_place,найди мне психоневралогический центр
+search_place,найди мне центр помощи больным
+search_place,найди мне центр помощи инвалидам
 legend_place,покажи легенду для Ванзеват
 legend_place,расскажи легенду для село
 legend_place,легенда для объекта Верхнеказымский

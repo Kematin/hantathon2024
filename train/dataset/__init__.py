@@ -49,7 +49,6 @@ test_dataset_info = [
     {"text": "что обозначают цвета на карте", "label": "legend_info"},
     {"text": "расскажи о значках на карте", "label": "legend_info"},
     {"text": "объясни легенду карты", "label": "legend_info"},
-    {"text": "что означает эта метка", "label": "legend_info"},
     # Метка "open_card"
     {"text": "открой карту", "label": "open_card"},
     {"text": "покажи карту", "label": "open_card"},
@@ -57,15 +56,17 @@ test_dataset_info = [
     {"text": "отобрази карту", "label": "open_card"},
     {"text": "покажи карту местности", "label": "open_card"},
     # Метка "disability_group"
-    {"text": "какая это группа", "label": "disability_group"},
-    {"text": "к какому типу инвалидности относится", "label": "disability_group"},
+    {"text": "какие есть группы инвалидности", "label": "disability_group"},
     {"text": "что это за группа инвалидности", "label": "disability_group"},
-    {"text": "определи группу инвалидности", "label": "disability_group"},
-    {"text": "какая группа инвалидности у", "label": "disability_group"},
+    {"text": "группа инвалидности", "label": "disability_group"},
+    {"text": "расскажи о группах инвалидности для сайта", "label": "disability_group"},
     # Метка "search_place"
     {"text": "покажи местоположение школы номер 1", "label": "search_place"},
     {"text": "где находится советская больница", "label": "search_place"},
-    {"text": "покажи адрес детского сада теремок", "label": "search_place"},
+    {"text": "покажи на карте детский сада теремок", "label": "search_place"},
+    {"text": "покажи на карте МЦФ", "label": "search_place"},
+    {"text": "покажи больницу", "label": "search_place"},
+    {"text": "покажи школу", "label": "search_place"},
     {"text": "найди на карте торговый центр", "label": "search_place"},
     # Метка "detailed_info"
     {"text": "расскажи подробнее о Сургут", "label": "detailed_info"},
@@ -76,11 +77,14 @@ test_dataset_info = [
     {"text": "хочу больше узнать о Лангепас", "label": "detailed_info"},
     {"text": "что ты знаешь о Когалым", "label": "detailed_info"},
     {"text": "расскажи подробнее о Нижневартовск", "label": "detailed_info"},
+    {"text": "расскажи подробнее о кинотеатре", "label": "detailed_info"},
+    {"text": "хочу узнать о МФЦ", "label": "detailed_info"},
     # Метка "search_radius"
     {"text": "найди все адреса в Белоярский район", "label": "search_radius"},
     {"text": "что рядом с Когалым", "label": "search_radius"},
     {"text": "что есть поблизости от Мегион", "label": "search_radius"},
     {"text": "какие объекты рядом с Нефтеюганск", "label": "search_radius"},
+    {"text": "найди все объекты города Сургут", "label": "search_radius"},
     # Метка "path"
     {"text": "как доехать от Сургут до Урай", "label": "path"},
     {"text": "покажи маршрут до Ханты-Мансийск", "label": "path"},
@@ -90,6 +94,7 @@ test_dataset_info = [
     {"text": "какая легенда у района Советский", "label": "legend_place"},
     {"text": "что за место на карте в Нижневартовск", "label": "legend_place"},
     {"text": "расскажи о местоположении по адресу Пыть-Ях", "label": "legend_place"},
+    {"text": "расскажи легенду поселка Радужный", "label": "legend_place"},
 ]
 
 

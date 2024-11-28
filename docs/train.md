@@ -103,10 +103,10 @@ dataset = read_dataset(datasetname)
 Hugging Face предоставляет удобный инструментарий для создания, обучения и использования NLP моделей, так что мы использовали библиотеку **transformers** и подгружали натренированный токенайзер модели **distilbert-base-uncased** для обучения модели.
 
 Обучения производилось по методу эпох, всего их было 10, лучшей по итогам оказалась 7 эпоха с цифрами:
-- eval_loss: 0.95
-- eval_accuracy: 0.767 (~77%)
+- eval_loss: 0.77
+- eval_accuracy: 0.83 (~83%)
 
-<img align="center" src="../images/train.jpg">
+<img align="center" src="../images/train.png">
 
 ```python
 
@@ -164,11 +164,11 @@ def train(model_name):
 
 ## Тестирование
 
-Для тестирования модели был написан небольшой скрипт, который по результатам работы угадывал команды с примерным шансом 90%
+Для тестирования модели был написан небольшой скрипт, который по результатам работы угадывал команды с шансом ~95%
 
-- score: 0.9-0.99 (~90-99%)
+- score: 0.92-0.99 (~92-99%)
 
-<img align="center" src="../images/train_result.jpg">
+<img align="center" src="../images/train_result.png">
 
 ```python
 from transformers import pipeline

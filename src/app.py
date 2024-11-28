@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import config
+from middleware import middleware
 from routers import routers
 from setup import configure_logger, init_hmao_model, init_speech_model
 
@@ -17,7 +18,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, middleware=middleware)
 
 for route in routers:
     app.include_router(route)

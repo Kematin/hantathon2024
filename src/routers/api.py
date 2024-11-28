@@ -1,8 +1,9 @@
 import os
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Query, Request, status
 from fastapi.responses import FileResponse, JSONResponse
 
+from config import config
 from exceptions import AIError, APIError
 from models import TextItem, VoiceItem
 from service.command import CommandHandler
@@ -24,7 +25,12 @@ async def get_default_audio(request: Request, filename: str):
 
 
 @router.get("/js", response_class=FileResponse)
-async def get_javascript(request: Request):
+async def get_javascript(request: Request, token: str = Query(...)):
+    if token != config.secret.get_secret_value():
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Forbidden: Invalid Bearer Token."},
+        )
     return FileResponse("component/js/index.js")
 
 
