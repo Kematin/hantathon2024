@@ -356,6 +356,28 @@ function getElementByXPath(xpath) {
   return result.singleNodeValue;
 }
 
+function waitForElement(xpath, timeout = 5000) {
+  return new Promise((resolve, reject) => {
+    const interval = 100;
+    let elapsedTime = 0;
+
+    const checkElement = () => {
+      const element = getElementByXPath(xpath);
+      const innerLi = element.querySelectorAll("li");
+      if (innerLi.length >= 2) {
+        resolve(innerLi);
+      } else if (elapsedTime >= timeout) {
+        reject(new Error("Element not found within timeout period"));
+      } else {
+        elapsedTime += interval;
+        setTimeout(checkElement, interval);
+      }
+    };
+
+    checkElement();
+  });
+}
+
 function handleSearchInput(place) {
   const enterEvent = new KeyboardEvent("keydown", {
     key: "Enter",
@@ -364,6 +386,7 @@ function handleSearchInput(place) {
     keyCode: 13,
     bubbles: true,
   });
+
   const inputEvent = new Event("input", { bubbles: true });
 
   const radioElement = document.querySelector("p.radio span.custom-radio");
@@ -380,12 +403,34 @@ function handleSearchInput(place) {
   searchElement.click();
   searchInput.click();
 
-  searchInput.value = place;
-
+  searchInput.value = "";
   searchInput.dispatchEvent(inputEvent);
-  setTimeout(() => {
-    searchInput.dispatchEvent(enterEvent);
-  }, 1000);
+
+  return new Promise((resolve, reject) => {
+    let currentPlace = place;
+
+    function tryInput(place) {
+      if (place.length === 2) {
+        console.error("Unable to find a valid selection with the given input.");
+        reject("No valid selection found");
+        return;
+      }
+
+      searchInput.value = place;
+      searchInput.dispatchEvent(inputEvent);
+
+      waitForElement(listPopupSelector, 500)
+        .then(() => {
+          searchInput.dispatchEvent(enterEvent);
+          resolve();
+        })
+        .catch(() => {
+          tryInput(place.slice(0, -1));
+        });
+    }
+
+    tryInput(currentPlace);
+  });
 }
 
 function waitForTableAndSelectElement(isFirst = true) {
@@ -473,26 +518,26 @@ const searchRadiusCommand = (data) => {
   playAudioDefault("wait");
   openCardPage();
   const place = data.place;
-  handleSearchInput(place);
-
-  waitForTableAndSelectElement(false).then((allRows) => {
-    if (!allRows || allRows.length === 0) {
-      console.error("No rows found.");
-      return;
-    }
-
-    let totalText = "Были найдены следующие объекты:\n";
-    for (let i = 0; i < allRows.length; i++) {
-      if (i === 2) {
-        break;
+  handleSearchInput(place).then(() => {
+    waitForTableAndSelectElement(false).then((allRows) => {
+      if (!allRows || allRows.length === 0) {
+        console.error("No rows found.");
+        return;
       }
-      const row = allRows[i];
-      const [object, address] = row.innerText.split("\t");
-      const formattedText = `${i + 1}. ${object} по адресу ${address}\n`;
-      totalText += formattedText;
-    }
-    console.log(totalText);
-    playAudioCommand(totalText);
+
+      let totalText = "Были найдены следующие объекты:\n";
+      for (let i = 0; i < allRows.length; i++) {
+        if (i === 2) {
+          break;
+        }
+        const row = allRows[i];
+        const [object, address] = row.innerText.split("\t");
+        const formattedText = `${i + 1}. ${object} по адресу ${address}\n`;
+        totalText += formattedText;
+      }
+      console.log(totalText);
+      playAudioCommand(totalText);
+    });
   });
 };
 
@@ -503,12 +548,12 @@ const searchPlaceCommand = (data) => {
   }
   openCardPage();
   const place = data.place;
-  handleSearchInput(place);
-
-  waitForTableAndSelectElement().then((firstRow) => {
-    const [object, address] = firstRow.innerText.split("\t");
-    const formattedText = `Был найден объект ${object} по адресу ${address}`;
-    playAudioCommand(formattedText);
+  handleSearchInput(place).then(() => {
+    waitForTableAndSelectElement().then((firstRow) => {
+      const [object, address] = firstRow.innerText.split("\t");
+      const formattedText = `Был найден объект ${object} по адресу ${address}`;
+      playAudioCommand(formattedText);
+    });
   });
 };
 
@@ -516,23 +561,25 @@ const detailedInfoCommnad = (data) => {
   playAudioDefault("wait");
   openCardPage();
   const place = data.place;
-  handleSearchInput(place);
-
-  waitForTableAndSelectElement().then((firstRow) => {
-    const popupElement = document.querySelector(
-      "div.leaflet-popup-content-wrapper"
-    );
-    const [object, address] = firstRow.innerText.split("\t");
-    const objectInfo = `Был найден объект ${object} по адресу: ${address}`;
-    if (popupElement === null) {
-      executeNotFoundPlace();
-    } else {
-      let allInfo = popupElement.querySelectorAll("tr.ng-scope:not(.ng-hide)");
-      const indicesToInclude = [4, 7, 9, 10, 11, 12, 13];
-      const additionalInfo = getFormattedInfoRows(allInfo, indicesToInclude);
-      const fullInfo = `${objectInfo}\n\nПодробная информация:\n${additionalInfo}`;
-      console.log(fullInfo);
-      playAudioCommand(fullInfo);
-    }
+  handleSearchInput(place).then(() => {
+    waitForTableAndSelectElement().then((firstRow) => {
+      const popupElement = document.querySelector(
+        "div.leaflet-popup-content-wrapper"
+      );
+      const [object, address] = firstRow.innerText.split("\t");
+      const objectInfo = `Был найден объект ${object} по адресу: ${address}`;
+      if (popupElement === null) {
+        executeNotFoundPlace();
+      } else {
+        let allInfo = popupElement.querySelectorAll(
+          "tr.ng-scope:not(.ng-hide)"
+        );
+        const indicesToInclude = [4, 7, 9, 10, 11, 12, 13];
+        const additionalInfo = getFormattedInfoRows(allInfo, indicesToInclude);
+        const fullInfo = `${objectInfo}\n\nПодробная информация:\n${additionalInfo}`;
+        console.log(fullInfo);
+        playAudioCommand(fullInfo);
+      }
+    });
   });
 };

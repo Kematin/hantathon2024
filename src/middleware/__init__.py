@@ -11,7 +11,6 @@ class CheckAuthorizationMiddleware(BaseHTTPMiddleware):
         auth_header = request.headers.get("Authorization")
         if request.url.path == "/api/js":
             return await call_next(request)
-        print(auth_header)
         if not auth_header or not auth_header.startswith("Bearer "):
             return JSONResponse(
                 status_code=401,
